@@ -5,6 +5,7 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import numpy
+from .interval import Interval
 
 
 class PolynomialSpace(object):
@@ -23,7 +24,10 @@ class LegendrePolynomial(PolynomialSpace):
     def __init__(self, degree):
         super(LegendrePolynomial, self).__init__(degree)
 
-    def eval(self, nodes):
+        # setting informations
+        self.reference_interval = Interval(-1., +1.)
+
+    def evaluate(self, nodes):
         num_of_nodes = len(nodes)
         values = numpy.empty((self.degree + 1, num_of_nodes))
         derivs = numpy.empty((self.degree + 1, num_of_nodes))

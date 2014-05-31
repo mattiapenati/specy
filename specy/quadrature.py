@@ -5,20 +5,21 @@
 # file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 import numpy
+from .interval import Interval
 
 
 class QuadratureRule(object):
     def rescale(self, interval):
-        a, b = interval
-        a0, b0 = self.reference_interval
+        f = self.referece_interval >> interval
 
-        alpha = (b-a)/(b0-a0)
-        beta = a - alpha * a0
-
-        nodes = alpha * self.nodes + beta
-        weights = alpha * self.weights
+        nodes = f(self.nodes)
+        weights = f.derivative(self.nodes) * self.weights
 
         return nodes, weights
+
+    @property
+    def num_of_nodes(self):
+        return len(self.nodes)
 
 
 class GaussLegendreQuadrature(QuadratureRule):
@@ -26,7 +27,7 @@ class GaussLegendreQuadrature(QuadratureRule):
         super(GaussLegendreQuadrature, self).__init__()
 
         # setting informations
-        self.reference_interval = (-1, +1)
+        self.reference_interval = Interval(-1., +1.)
 
         # nodes and weights
         self.nodes = numpy.empty(num_of_nodes)
