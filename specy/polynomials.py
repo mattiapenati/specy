@@ -28,13 +28,13 @@ class LegendrePolynomial(PolynomialSpace):
         self.reference_interval = Interval(-1., +1.)
 
     def evaluate(self, nodes):
-        num_of_nodes = len(nodes)
+        num_of_nodes = numpy.size(nodes)
         values = numpy.empty((self.degree + 1, num_of_nodes))
         derivs = numpy.empty((self.degree + 1, num_of_nodes))
 
         # initialization
         values[0, :] = 1
-        values[1, :] = nodes[:]
+        values[1, :] = nodes
 
         derivs[0, :] = 0
         derivs[1, :] = 1
@@ -44,7 +44,8 @@ class LegendrePolynomial(PolynomialSpace):
         b = lambda i: i / (i + 1.)
 
         for i in range(1, self.degree):
-            values[i+1, :] = a(i)*nodes*values[i, :] - b(i)*values[i-1, :]
+            values[i+1, :] = \
+                a(i) * nodes * values[i, :] - b(i) * values[i-1, :]
 
             derivs[i+1, :] = nodes * values[i+1, :] - values[i, :]
             derivs[i+1, :] *= (i + 1.) / (1 - nodes ** 2)

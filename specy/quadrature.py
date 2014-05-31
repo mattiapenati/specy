@@ -19,7 +19,7 @@ class QuadratureRule(object):
 
     @property
     def num_of_nodes(self):
-        return len(self.nodes)
+        return numpy.size(self.nodes)
 
 
 class GaussLegendreQuadrature(QuadratureRule):
