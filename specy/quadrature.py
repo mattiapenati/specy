@@ -10,7 +10,7 @@ from .interval import Interval
 
 class QuadratureRule(object):
     def rescale(self, interval):
-        f = self.referece_interval >> interval
+        f = self.reference_interval >> interval
 
         nodes = f(self.nodes)
         weights = f.derivative(self.nodes) * self.weights
