@@ -47,7 +47,13 @@ class LegendrePolynomial(PolynomialSpace):
             values[i+1, :] = \
                 a(i) * nodes * values[i, :] - b(i) * values[i-1, :]
 
-            derivs[i+1, :] = nodes * values[i+1, :] - values[i, :]
-            derivs[i+1, :] *= (i + 1.) / (1 - nodes ** 2)
+            derivs[i+1, :] = \
+                a(i) * (values[i, :] + nodes * derivs[i, :]) - \
+                b(i) * derivs[i-1, :]
+    
+        # reshape to vectors if needed
+        if values.shape[1] == 1:
+            values.shape = (values.shape[0],)
+            derivs.shape = (derivs.shape[0],)
 
         return values, derivs
