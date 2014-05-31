@@ -7,3 +7,4 @@
 from .interval import Interval
 from .quadrature import GaussLegendreQuadrature
 from .polynomials import LegendrePolynomial
+from .system import MechanicalSystem
