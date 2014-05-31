@@ -40,6 +40,14 @@ class Interval(object):
         '''Give the size of interval'''
         return self._b - self._a
 
+    @property
+    def a(self):
+        return self._a
+
+    @property
+    def b(self):
+        return self._b
+
     def __rshift__(self, other):
         '''Create the linear transformation (a,b) >> (c,d)'''
         assert isinstance(other, Interval), 'please specify a valid interval'
