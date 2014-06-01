@@ -21,26 +21,20 @@ class Integrator(object):
         raise NotImplementedError()
 
 
-class NStepsIntegrator(Integrator):
-    def __init__(self, stepper, x0, t0, dt, steps):
-        super(NStepsIntegrator, self).__init__(stepper)
+class ConstantTimeStepping(Integrator):
+    def __init__(self, stepper, x0, t0, dt):
+        super(ConstantTimeStepping, self).__init__(stepper)
         self._x0 = x0
         self._t0 = t0
         self._dt = dt
-        self._steps = steps
-        self._step = 0
 
     def __next__(self):
-        if self._step < self._steps:
-            # compute the next step
-            time_interval = Interval(self._t0, self._t0 + self._dt)
-            xnext, data = self.stepper.step(self._x0, time_interval)
+        # compute the next step
+        time_interval = Interval(self._t0, self._t0 + self._dt)
+        xnext, data = self.stepper.step(self._x0, time_interval)
 
-            # update status
-            self._x0 = xnext
-            self._t0 += self._dt
-            self._step += 1
+        # update status
+        self._x0 = xnext
+        self._t0 += self._dt
 
-            return xnext, data
-        else:
-            raise StopIteration()
+        return xnext, self._t0, data
