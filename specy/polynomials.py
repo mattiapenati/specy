@@ -50,7 +50,7 @@ class LegendrePolynomial(PolynomialSpace):
             derivs[i+1, :] = \
                 a(i) * (values[i, :] + nodes * derivs[i, :]) - \
                 b(i) * derivs[i-1, :]
-    
+
         # reshape to vectors if needed
         if values.shape[1] == 1:
             values.shape = (values.shape[0],)
