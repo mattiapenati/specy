@@ -12,10 +12,6 @@ from .polynomials import PolynomialSpace
 from .quadrature import QuadratureRule
 
 
-class Stepper(object):
-    pass
-
-
 class SpectralVariationalData(object):
     def __init__(self, dimension, num_of_nodes, num_of_modes):
         # by columns, each column containts a modal (or a nodal) value
@@ -135,7 +131,7 @@ class SpectralVariationalEvaluator(object):
         raise ValueError('invalid system is given')
 
 
-class SpectralVariationalStepper(Stepper):
+class Stepper(object):
     def __init__(self, polynomial_space, quadrature_rule, system):
         assert isinstance(polynomial_space, PolynomialSpace), \
             'please specify a valid polynomial space'
