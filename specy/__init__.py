@@ -8,4 +8,5 @@ from .interval import Interval
 from .quadrature import GaussLegendreQuadrature
 from .polynomials import LegendrePolynomial
 from .system import MechanicalSystem
-from .steppers import SpectralVariationalStepper
+from .steppers import Stepper
+from .integrators import NStepsIntegrator
