@@ -6,6 +6,7 @@
 
 import numpy
 import scipy.optimize
+import scipy.interpolate
 from .interval import Interval
 from .system import MechanicalSystem
 from .polynomials import PolynomialSpace
@@ -18,6 +19,10 @@ class SpectralVariationalData(object):
         self.position = numpy.empty((dimension, num_of_modes))
         self.momentum = numpy.empty((dimension, num_of_nodes))
         self.next_momentum = numpy.empty(dimension)
+
+    @property
+    def dimension(self):
+        return self.next_momentum.size
 
     @property
     def size(self):
@@ -155,7 +160,63 @@ class Stepper(object):
         # mechanical system
         self.system = system
 
-    def step(self, q_p, time_interval):
+    @property
+    def num_of_nodes(self):
+        return len(self.nodes)
+
+    @property
+    def num_of_modes(self):
+        return self.degree + 1
+
+    def interpolate(self, data, time_interval):
+        # unpack data
+        position, momentum, time = data
+
+        # new times
+        eta = self.reference_interval >> time_interval
+        new_time = eta(self.nodes)
+
+        # checking the dimension
+        if numpy.rank(position) == 1:
+            assert 1 == self.system.dimension, \
+                'wrong problem dimension'
+            new_position = numpy.empty(self.num_of_modes)
+            new_momentum = numpy.empty(self.num_of_nodes)
+            # extracting the position modes
+            if self.num_of_modes > position.size:
+                new_position[:position.size] = position[:]
+                new_position[position.size:] = 0
+            else:
+                new_position[:] = position[:self.num_of_modes]
+            # computing the new momentum
+            interpolate_momentum = scipy.interpolate.interp1d(
+                time, momentum, assume_sorted=True)
+            new_momentum[0] = momentum[0]
+            new_momentum[1:-1] = interpolate_momentum(new_time[1:-1])
+            new_momentum[-1] = momentum[-1]
+        else:
+            assert position.shape[0] == self.system.dimension, \
+                'wrong problem dimension'
+            dimension = self.system.dimension
+            new_position = numpy.empty((dimension, self.num_of_modes))
+            new_momentum = numpy.empty((dimension, self.num_of_nodes))
+            # extracting the position modes
+            if self.num_of_modes > position.shape[1]:
+                new_position[:, :position.shape[1]] = position[:, :]
+                new_position[:, position.shape[1]:] = 0
+            else:
+                new_position[:, :] = position[:, :self.num_of_modes]
+            # computing the new momentum
+            interpolate_momentum = scipy.interpolate.interp1d(
+                time, momentum.T, assume_sorted=True)
+            new_momentum[:, 0] = momentum[:, 0]
+            new_momentum[:, 1:-1] = interpolate_momentum(new_time[1:-1])
+            new_momentum[:, -1] = momentum[:, -1]
+
+        # return
+        return new_position, new_momentum, new_time
+
+    def step(self, q_p, time_interval, guess=None):
         # instantiate everything
         evaluator = SpectralVariationalEvaluator(self, q_p, time_interval)
 
@@ -165,11 +226,18 @@ class Stepper(object):
             self.system.dimension, self.num_of_nodes, self.num_of_modes)
 
         # initial guess
-        q0, p0 = q_p
-        initial_data.position[:, 0] = q0
-        initial_data.position[:, 1:] = 0
-        initial_data.momentum[:, :] = 0
-        initial_data.next_momentum[:] = 0
+        if guess is None:
+            q0, p0 = q_p
+            initial_data.position[:, 0] = q0
+            initial_data.position[:, 1:] = 0
+            initial_data.momentum[:, :] = 0
+            initial_data.next_momentum[:] = p0
+        else:
+            q0, p0 = q_p
+            guess_position, guess_momentum, _ = guess
+            initial_data.position.flat[:] = guess_position.flat[:]
+            initial_data.momentum.flat[:] = guess_momentum.flat[:]
+            initial_data.next_momentum[:] = p0
 
         # newton method
         def f(x):
@@ -200,11 +268,3 @@ class Stepper(object):
 
         # return
         return (q1, p1), (initial_data.position, initial_data.momentum, t)
-
-    @property
-    def num_of_nodes(self):
-        return len(self.nodes)
-
-    @property
-    def num_of_modes(self):
-        return self.degree + 1

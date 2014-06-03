@@ -51,6 +51,7 @@ class AdaptiveTimeStepping(Integrator):
         self.stepper, self.estimator = steppers
         self._x0 = x0
         self._t0 = Accumulator(t0)
+        self._data0 = None
         if dt is None:
             # TODO initial guess
             pass
@@ -68,9 +69,14 @@ class AdaptiveTimeStepping(Integrator):
 
         # compute the next step
         time_interval = Interval(t0, t1)
-        xnext, data = self.stepper.step(self._x0, time_interval)
+        xnext, data = self.stepper.step(
+            self._x0, time_interval, guess=self._data0)
+        self._data0 = data
+
+        # compute the estimeted solution
+        guess = self.estimator.interpolate(data, time_interval)
         xestimated, data_estimated = \
-            self.estimator.step(self._x0, time_interval)
+            self.estimator.step(self._x0, time_interval, guess=guess)
 
         # estimate the error
         sc0 = self.absolute_tolerance + \
