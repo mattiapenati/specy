@@ -194,8 +194,12 @@ class Stepper(object):
             initial_data.position.shape = (self.num_of_modes,)
             initial_data.momentum.shape = (self.num_of_nodes,)
 
+        # rescale the time interval
+        eta = self.reference_interval >> time_interval
+        t = eta(self.nodes)
+
         # return
-        return (q1, p1), (initial_data.position, initial_data.momentum)
+        return (q1, p1), (initial_data.position, initial_data.momentum, t)
 
     @property
     def num_of_nodes(self):

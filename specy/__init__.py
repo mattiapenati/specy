@@ -9,4 +9,4 @@ from .quadrature import GaussLegendreQuadrature
 from .polynomials import LegendrePolynomial
 from .system import MechanicalSystem
 from .steppers import Stepper
-from .integrators import ConstantTimeStepping
+from .integrators import ConstantTimeStepping, AdaptiveTimeStepping
