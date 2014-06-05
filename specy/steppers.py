@@ -168,6 +168,11 @@ class Stepper(object):
     def num_of_modes(self):
         return self.degree + 1
 
+    @property
+    def order(self):
+        # TODO correct!
+        return 2 * self.degree
+
     def interpolate(self, data, time_interval):
         # unpack data
         position, momentum, time = data
@@ -208,7 +213,7 @@ class Stepper(object):
                 new_position[:, :] = position[:, :self.num_of_modes]
             # computing the new momentum
             interpolate_momentum = scipy.interpolate.interp1d(
-                time, momentum.T, assume_sorted=True)
+                time, momentum, assume_sorted=True)
             new_momentum[:, 0] = momentum[:, 0]
             new_momentum[:, 1:-1] = interpolate_momentum(new_time[1:-1])
             new_momentum[:, -1] = momentum[:, -1]
